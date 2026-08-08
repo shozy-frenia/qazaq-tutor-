@@ -1,4 +1,4 @@
-import { getRandomQuestion } from '../data/questions.js';
+import { getRandomQuestion, questionsDB } from '../data/questions.js';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
