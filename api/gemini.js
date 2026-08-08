@@ -25,14 +25,15 @@ export default async function handler(req, res) {
     : `Ты — AI-репетитор для подготовки к ЕНТ в Казахстане...`;
 
   const requestBody = {
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: 'You are a helpful AI tutor for Kazakh students preparing for ENT exams.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.7,
-    max_tokens: 800,
-  };
+  model: 'gpt-3.5-turbo',  // ← ИЗМЕНЕНО
+  messages: [
+    { role: 'system', content: 'You are a helpful AI tutor for Kazakh students preparing for ENT exams.' },
+    { role: 'user', content: prompt }
+  ],
+  temperature: 0.7,
+  max_tokens: 800,
+};
+
 
   console.log('=== SENDING TO FREETHEAI ===');
   console.log('URL:', 'https://api.freetheai.xyz/v1/chat/completions');
