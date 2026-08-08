@@ -1,23 +1,82 @@
-import { useStore } from './store/useStore.js';
-import Header from './components/Header.jsx';
-import HomeView from './components/HomeView.jsx';
-import TutorView from './components/TutorView.jsx';
-import ProgressView from './components/ProgressView.jsx';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-export default function App() {
-  const { currentView } = useStore();
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #0F172A;
+    color: #F1F5F9;
+    min-height: 100vh;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #1E293B;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
 
-  return (
-    <div className="min-h-screen bg-dark-bg text-slate-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
-        <Header />
-        
-        <main>
-          {currentView === 'home' && <HomeView />}
-          {currentView === 'tutor' && <TutorView />}
-          {currentView === 'progress' && <ProgressView />}
-        </main>
-      </div>
-    </div>
-  );
+@layer components {
+  .gradient-text {
+    background: linear-gradient(90deg, #00AFCA, #FECB00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: #00AFCA;
+    box-shadow: 0 20px 40px rgba(0, 175, 202, 0.15);
+  }
+  
+  .typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #00AFCA;
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+  }
+  
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s infinite;
 }
