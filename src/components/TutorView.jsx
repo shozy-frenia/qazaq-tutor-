@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore.js';
 import { getSubjectById } from '../data/subjects.js';
 import { getQuestion } from '../services/aiService.js';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Menu, X } from 'lucide-react';
 
 export default function TutorView() {
   const {
@@ -26,6 +26,8 @@ export default function TutorView() {
   
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [shownQuestions, setShownQuestions] = useState([]);
   const messagesEndRef = useRef(null);
   
   const t = (ru, kz) => language === 'kz' ? kz : ru;
@@ -40,20 +42,18 @@ export default function TutorView() {
       const greeting = {
         type: 'ai',
         content: t(
-          `Отлично! Вы выбрали предмет «${subject?.name}». Я готов помочь с подготовкой! Выберите тему слева, и я задам вам задание. 🎯`,
-          `Керемет! Сіз «${subject?.nameKz}» пәнін таңдадыңыз. Дайындалуға көмектесуге дайынмын! Сол жақтан тақырыпты таңдаңыз, мен сізге тапсырма беремін. 🎯`
+          `Отлично! Вы выбрали предмет «${subject?.name}». Выберите тему ниже, и я задам вам задание. 🎯`,
+          `Керемет! Сіз «${subject?.nameKz}» пәнін таңдадыңыз. Тақырыпты таңдаңыз, мен сізге тапсырма беремін. 🎯`
         ),
       };
       addMessage(greeting);
-      
-      if (subject?.topics?.length > 0) {
-        setTimeout(() => selectTopic(subject.topics[0]), 800);
-      }
     }
   }, [currentSubject]);
   
   const selectTopic = async (topic) => {
     setCurrentTopic(topic);
+    setSidebarOpen(false);
+    setShownQuestions([]);
     
     const msg = {
       type: 'ai',
@@ -68,13 +68,28 @@ export default function TutorView() {
   };
   
   const generateNewQuestion = async (topic = currentTopic) => {
-    if (!topic) return;
+    if (!topic || !currentSubject) return;
     
     setIsLoading(true);
     setIsTyping(true);
     
     try {
-      const question = await getQuestion(currentSubject, topic.id, difficulty, language);
+      const question = await getQuestion(currentSubject, topic.id, difficulty, language, shownQuestions);
+      
+      if (!question) {
+        setIsTyping(false);
+        setIsLoading(false);
+        addMessage({
+          type: 'ai',
+          content: t(
+            'По этой теме пока нет заданий. Выберите другую тему! 📚',
+            'Бұл тақырып бойынша тапсырмалар жоқ. Басқа тақырыпты таңдаңыз! 📚'
+          ),
+        });
+        return;
+      }
+      
+      setShownQuestions(prev => [...prev, question.id]);
       setCurrentQuestion(question);
       setIsWaitingForAnswer(true);
       
@@ -84,10 +99,10 @@ export default function TutorView() {
       };
       addMessage(qMsg);
     } catch (error) {
-      console.error('Error generating question:', error);
+      console.error('Error:', error);
       addMessage({
         type: 'ai',
-        content: t('Произошла ошибка. Попробуйте ещё раз!', 'Қате болды. Қайтадан көріңіз!'),
+        content: t('Ошибка загрузки. Попробуйте ещё раз!', 'Жүктеу қатесі. Қайтадан көріңіз!'),
       });
     } finally {
       setIsLoading(false);
@@ -123,8 +138,8 @@ export default function TutorView() {
         addMessage({
           type: 'ai',
           content: t(
-            'Хотите ещё одно задание? Напишите «ещё» или выберите другую тему слева. 📝',
-            'Тағы бір тапсырма керек пе? «Тағы» деп жазыңыз немесе сол жақтан басқа тақырыпты таңдаңыз. 📝'
+            'Напишите «ещё» для нового задания по этой теме или выберите другую тему. 📝',
+            '«Тағы» деп жазыңыз немесе басқа тақырыпты таңдаңыз. 📝'
           ),
         });
       }, 500);
@@ -145,26 +160,14 @@ export default function TutorView() {
       setIsTyping(true);
       setTimeout(async () => {
         setIsTyping(false);
-        addMessage({
-          type: 'ai',
-          content: t('Вот следующее задание:', 'Міне, келесі тапсырма:'),
-        });
         await generateNewQuestion();
       }, 600);
-    } else if (lowerText.includes('помоги') || lowerText.includes('объясни') || lowerText.includes('көмек') || lowerText.includes('түсіндір')) {
-      addMessage({
-        type: 'ai',
-        content: t(
-          'Конечно! Задайте конкретный вопрос по теме, и я подробно объясню. 📚',
-          'Әрине! Тақырып бойынша нақты сұрақ қойыңыз, мен толық түсіндіремін. 📚'
-        ),
-      });
     } else {
       addMessage({
         type: 'ai',
         content: t(
-          'Понял! Напишите «ещё» для нового задания, или выберите тему слева. 💡',
-          'Түсіндім! Жаңа тапсырма үшін «тағы» деп жазыңыз немесе сол жақтан тақырыпты таңдаңыз. 💡'
+          'Напишите «ещё» для нового задания или выберите тему. 💡',
+          'Жаңа тапсырма үшін «тағы» деп жазыңыз немесе тақырыпты таңдаңыз. 💡'
         ),
       });
     }
@@ -188,10 +191,6 @@ export default function TutorView() {
       <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in">
         <div className="text-6xl mb-4">📚</div>
         <h2 className="text-2xl font-bold mb-2">{t('Выберите предмет', 'Пәнді таңдаңыз')}</h2>
-        <p className="text-slate-400 mb-6 max-w-md">
-          {t('Перейдите на главную страницу и выберите предмет для начала занятий',
-             'Сабақ бастау үшін басты бетке өтіп, пәнді таңдаңыз')}
-        </p>
         <button
           onClick={() => setCurrentView('home')}
           className="px-6 py-3 bg-kz-blue rounded-xl font-semibold hover:bg-kz-blue-dark transition-colors"
@@ -204,57 +203,80 @@ export default function TutorView() {
   
   return (
     <div className="flex gap-5 h-[calc(100vh-140px)] animate-fade-in">
-      {/* Sidebar */}
-      <aside className="w-72 bg-dark-card border border-dark-border rounded-2xl p-5 flex flex-col hidden lg:flex">
-        <div className="mb-5">
-          <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-            <Sparkles size={14} className="text-kz-gold" />
-            {t('Темы по предмету', 'Пән бойынша тақырыптар')}
-          </h3>
-          <div className="flex flex-col gap-1.5">
-            {subject?.topics?.map((topic) => (
-              <button
-                key={topic.id}
-                onClick={() => selectTopic(topic)}
-                className={`
-                  flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-all text-left
-                  ${currentTopic?.id === topic.id
-                    ? 'bg-kz-blue/15 text-kz-blue'
-                    : 'text-slate-400 hover:bg-kz-blue/10 hover:text-slate-200'
-                  }
-                `}
-              >
-                <span className="truncate">{language === 'kz' ? topic.nameKz : topic.name}</span>
-                <span className={`text-xs font-semibold ml-2 shrink-0 ${
-                  topic.progress > 50 ? 'text-green-400' : 'text-amber-400'
-                }`}>
-                  {topic.progress}%
-                </span>
-              </button>
-            ))}
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed bottom-4 right-4 z-50 w-12 h-12 bg-kz-blue rounded-full flex items-center justify-center shadow-lg"
+      >
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+      
+      {/* Sidebar - Desktop always visible, Mobile conditional */}
+      <aside className={`
+        ${sidebarOpen ? 'fixed inset-0 z-40 bg-dark-bg/95 backdrop-blur-sm flex items-center justify-center' : 'hidden'}
+        lg:static lg:flex lg:w-72 lg:bg-dark-card lg:backdrop-blur-none
+        w-full h-full
+      `}>
+        <div className={`
+          bg-dark-card border border-dark-border rounded-2xl p-5 flex flex-col
+          ${sidebarOpen ? 'w-80 max-h-[80vh]' : 'w-full h-full'}
+        `}>
+          <div className="flex items-center justify-between mb-4 lg:hidden">
+            <h3 className="font-semibold">{t('Темы', 'Тақырыптар')}</h3>
+            <button onClick={() => setSidebarOpen(false)} className="p-1">
+              <X size={20} />
+            </button>
           </div>
-        </div>
-        
-        <div className="mt-auto pt-5 border-t border-dark-border">
-          <h3 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
-            {t('Уровень сложности', 'Қиындық деңгейі')}
-          </h3>
-          <div className="flex gap-1.5">
-            {difficulties.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => setDifficulty(d.id)}
-                className={`
-                  flex-1 py-2 rounded-lg text-xs font-medium transition-all
-                  ${difficulty === d.id
-                    ? 'bg-kz-blue text-white'
-                    : 'bg-dark-bg text-slate-400 hover:text-slate-200 border border-dark-border'
-                  }
-                `}
-              >
-                {d.label}
-              </button>
-            ))}
+          
+          <div className="mb-5 overflow-y-auto flex-1">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3 hidden lg:flex items-center gap-2">
+              📋 {t('Темы по предмету', 'Пән бойынша тақырыптар')}
+            </h3>
+            <div className="flex flex-col gap-1.5">
+              {subject?.topics?.map((topic) => (
+                <button
+                  key={topic.id}
+                  onClick={() => selectTopic(topic)}
+                  className={`
+                    flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-all text-left
+                    ${currentTopic?.id === topic.id
+                      ? 'bg-kz-blue/15 text-kz-blue border border-kz-blue/20'
+                      : 'text-slate-400 hover:bg-kz-blue/10 hover:text-slate-200'
+                    }
+                  `}
+                >
+                  <span className="truncate">{language === 'kz' ? topic.nameKz : topic.name}</span>
+                  <span className={`text-xs font-semibold ml-2 shrink-0 ${
+                    topic.progress > 50 ? 'text-green-400' : 'text-amber-400'
+                  }`}>
+                    {topic.progress}%
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="pt-4 border-t border-dark-border">
+            <h3 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
+              {t('Сложность', 'Қиындық')}
+            </h3>
+            <div className="flex gap-1.5">
+              {difficulties.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => setDifficulty(d.id)}
+                  className={`
+                    flex-1 py-2 rounded-lg text-xs font-medium transition-all
+                    ${difficulty === d.id
+                      ? 'bg-kz-blue text-white'
+                      : 'bg-dark-bg text-slate-400 hover:text-slate-200 border border-dark-border'
+                    }
+                  `}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </aside>
@@ -273,16 +295,26 @@ export default function TutorView() {
               {t('Онлайн', 'Желіде')}
             </div>
           </div>
-          {subject && (
+          {currentTopic && (
             <div className="ml-auto flex items-center gap-2 text-xs text-slate-400 bg-dark-bg px-3 py-1.5 rounded-lg">
-              <span>{subject.icon}</span>
-              <span>{language === 'kz' ? subject.nameKz : subject.name}</span>
+              <span>{subject?.icon}</span>
+              <span className="hidden sm:inline">{language === 'kz' ? currentTopic.nameKz : currentTopic.name}</span>
             </div>
           )}
         </div>
         
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+          {messages.length === 0 && (
+            <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400">
+              <div className="text-4xl mb-3">👆</div>
+              <p className="text-sm max-w-xs">
+                {t('Выберите тему слева или нажмите кнопку меню внизу', 
+                   'Сол жақтан тақырыпты таңдаңыз немесе төмендегі мәзір батырмасын басыңыз')}
+              </p>
+            </div>
+          )}
+          
           {messages.map((msg) => {
             if (msg.type === 'ai') {
               return (
@@ -399,8 +431,8 @@ export default function TutorView() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={t(
-              'Напишите ответ или задайте вопрос...',
-              'Жауап жазыңыз немесе сұрақ қойыңыз...'
+              'Напишите «ещё» или выберите тему...',
+              '«Тағы» деп жазыңыз немесе тақырыпты таңдаңыз...'
             )}
             className="flex-1 px-5 py-3 rounded-xl bg-dark-bg border border-dark-border text-sm text-white placeholder-slate-500 outline-none focus:border-kz-blue transition-colors"
           />
@@ -410,7 +442,7 @@ export default function TutorView() {
             className="px-5 py-3 bg-gradient-to-r from-kz-blue to-kz-blue-dark rounded-xl font-semibold text-sm hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Send size={16} />
-            {t('Отправить', 'Жіберу')}
+            <span className="hidden sm:inline">{t('Отправить', 'Жіберу')}</span>
           </button>
         </div>
       </div>
