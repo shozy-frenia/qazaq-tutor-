@@ -1,108 +1,120 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export const useStore = create((set, get) => ({
-  language: 'ru',
-  setLanguage: (lang) => set({ language: lang }),
-  
-  currentView: 'home',
-  setCurrentView: (view) => set({ currentView: view }),
-  
-  currentSubject: null,
-  setCurrentSubject: (subject) => set({ currentSubject: subject }),
-  
-  currentTopic: null,
-  setCurrentTopic: (topic) => set({ currentTopic: topic }),
-  
-  difficulty: null,
-  setDifficulty: (diff) => set({ difficulty: diff }),
-  
-  messages: [],
-  addMessage: (message) => set((state) => ({ 
-    messages: [...state.messages, { ...message, id: Date.now() }] 
-  })),
-  clearMessages: () => set({ messages: [] }),
-  
-  currentQuestion: null,
-  setCurrentQuestion: (q) => set({ currentQuestion: q }),
-  
-  isWaitingForAnswer: false,
-  setIsWaitingForAnswer: (val) => set({ isWaitingForAnswer: val }),
-  
-  isLoading: false,
-  setIsLoading: (val) => set({ isLoading: val }),
-  
-  stats: {
-    totalAnswered: 0,
-    correctAnswers: 0,
-    streak: 0,
-    bestStreak: 0,
-    subjectStats: {
-      math: { answered: 0, correct: 0 },
-      physics: { answered: 0, correct: 0 },
-      chemistry: { answered: 0, correct: 0 },
-      history: { answered: 0, correct: 0 },
-      biology: { answered: 0, correct: 0 },
-      kazakh: { answered: 0, correct: 0 },
-    },
-    weeklyProgress: [0, 0, 0, 0, 0, 0, 0],
-    lastActiveDay: null,
-    completedSubjects: [],
-    topicProgress: {},
-  },
-  
-  updateStats: (isCorrect, subjectId, topicId) => set((state) => {
-    const today = new Date().getDay();
-    const newStreak = isCorrect ? state.stats.streak + 1 : 0;
-    const newBestStreak = Math.max(newStreak, state.stats.bestStreak);
-    
-    const weekProgress = [...state.stats.weeklyProgress];
-    weekProgress[today === 0 ? 6 : today - 1] += isCorrect ? 1 : 0;
-    
-    const subjectStats = { ...state.stats.subjectStats };
-    if (subjectId && subjectStats[subjectId]) {
-      subjectStats[subjectId] = {
-        answered: subjectStats[subjectId].answered + 1,
-        correct: subjectStats[subjectId].correct + (isCorrect ? 1 : 0),
-      };
-    }
-    
-    const topicKey = topicId ? `${subjectId}:${topicId}` : null;
-    const newTopicProgress = { ...state.stats.topicProgress };
-    if (topicKey) {
-      const tp = newTopicProgress[topicKey] || { answered: 0, correct: 0 };
-      newTopicProgress[topicKey] = {
-        answered: tp.answered + 1,
-        correct: tp.correct + (isCorrect ? 1 : 0),
-      };
-    }
-    
-    const completedSubjects = [...state.stats.completedSubjects];
-    if (topicKey && newTopicProgress[topicKey]?.correct >= 5) {
-      if (!completedSubjects.includes(subjectId)) {
-        completedSubjects.push(subjectId);
-      }
-    }
-    
-    return {
+export const useStore = create(
+  persist(
+    (set, get) => ({
+      language: 'ru',
+      setLanguage: (lang) => set({ language: lang }),
+      
+      currentView: 'home',
+      setCurrentView: (view) => set({ currentView: view }),
+      
+      currentSubject: null,
+      setCurrentSubject: (subject) => set({ currentSubject: subject }),
+      
+      currentTopic: null,
+      setCurrentTopic: (topic) => set({ currentTopic: topic }),
+      
+      difficulty: null,
+      setDifficulty: (diff) => set({ difficulty: diff }),
+      
+      messages: [],
+      addMessage: (message) => set((state) => ({ 
+        messages: [...state.messages, { ...message, id: Date.now() }] 
+      })),
+      clearMessages: () => set({ messages: [] }),
+      
+      currentQuestion: null,
+      setCurrentQuestion: (q) => set({ currentQuestion: q }),
+      
+      isWaitingForAnswer: false,
+      setIsWaitingForAnswer: (val) => set({ isWaitingForAnswer: val }),
+      
+      isLoading: false,
+      setIsLoading: (val) => set({ isLoading: val }),
+      
       stats: {
-        ...state.stats,
-        totalAnswered: state.stats.totalAnswered + 1,
-        correctAnswers: state.stats.correctAnswers + (isCorrect ? 1 : 0),
-        streak: newStreak,
-        bestStreak: newBestStreak,
-        subjectStats,
-        weeklyProgress: weekProgress,
-        topicProgress: newTopicProgress,
-        completedSubjects,
+        totalAnswered: 0,
+        correctAnswers: 0,
+        streak: 0,
+        bestStreak: 0,
+        subjectStats: {
+          math: { answered: 0, correct: 0 },
+          physics: { answered: 0, correct: 0 },
+          chemistry: { answered: 0, correct: 0 },
+          history: { answered: 0, correct: 0 },
+          biology: { answered: 0, correct: 0 },
+          kazakh: { answered: 0, correct: 0 },
+        },
+        weeklyProgress: [0, 0, 0, 0, 0, 0, 0],
+        lastActiveDay: null,
+        completedSubjects: [],
+        topicProgress: {},
       },
-    };
-  }),
-  
-  startNewSubject: (subjectId) => set({
-    currentSubject: subjectId,
-    currentTopic: null,
-    messages: [],
-    currentQuestion: null,
-    isWaitingForAnswer: false,
-  }),
-}));
+      
+      updateStats: (isCorrect, subjectId, topicId) => set((state) => {
+        const today = new Date().getDay();
+        const newStreak = isCorrect ? state.stats.streak + 1 : 0;
+        const newBestStreak = Math.max(newStreak, state.stats.bestStreak);
+        
+        const weekProgress = [...state.stats.weeklyProgress];
+        weekProgress[today === 0 ? 6 : today - 1] += isCorrect ? 1 : 0;
+        
+        const subjectStats = { ...state.stats.subjectStats };
+        if (subjectId && subjectStats[subjectId]) {
+          subjectStats[subjectId] = {
+            answered: subjectStats[subjectId].answered + 1,
+            correct: subjectStats[subjectId].correct + (isCorrect ? 1 : 0),
+          };
+        }
+        
+        const topicKey = topicId ? `${subjectId}:${topicId}` : null;
+        const newTopicProgress = { ...state.stats.topicProgress };
+        if (topicKey) {
+          const tp = newTopicProgress[topicKey] || { answered: 0, correct: 0 };
+          newTopicProgress[topicKey] = {
+            answered: tp.answered + 1,
+            correct: tp.correct + (isCorrect ? 1 : 0),
+          };
+        }
+        
+        const completedSubjects = [...state.stats.completedSubjects];
+        if (topicKey && newTopicProgress[topicKey]?.correct >= 5) {
+          if (!completedSubjects.includes(subjectId)) {
+            completedSubjects.push(subjectId);
+          }
+        }
+        
+        return {
+          stats: {
+            ...state.stats,
+            totalAnswered: state.stats.totalAnswered + 1,
+            correctAnswers: state.stats.correctAnswers + (isCorrect ? 1 : 0),
+            streak: newStreak,
+            bestStreak: newBestStreak,
+            subjectStats,
+            weeklyProgress: weekProgress,
+            topicProgress: newTopicProgress,
+            completedSubjects,
+          },
+        };
+      }),
+      
+      startNewSubject: (subjectId) => set({
+        currentSubject: subjectId,
+        currentTopic: null,
+        messages: [],
+        currentQuestion: null,
+        isWaitingForAnswer: false,
+      }),
+    }),
+    {
+      name: 'qazaq-tutor-storage',
+      partialize: (state) => ({ 
+        stats: state.stats,
+        language: state.language,
+      }),
+    }
+  )
+);
