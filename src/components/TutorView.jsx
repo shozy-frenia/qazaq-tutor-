@@ -10,8 +10,6 @@ export default function TutorView() {
     currentSubject,
     currentTopic,
     setCurrentTopic,
-    difficulty,
-    setDifficulty,
     messages,
     addMessage,
     currentQuestion,
@@ -22,6 +20,7 @@ export default function TutorView() {
     setIsLoading,
     updateStats,
     setCurrentView,
+    stats,
   } = useStore();
   
   const [inputValue, setInputValue] = useState('');
@@ -50,6 +49,13 @@ export default function TutorView() {
     }
   }, [currentSubject]);
   
+  const getTopicProgress = (topicId) => {
+    const key = `${currentSubject}:${topicId}`;
+    const tp = stats.topicProgress[key];
+    if (!tp || tp.answered === 0) return 0;
+    return Math.round((tp.correct / tp.answered) * 100);
+  };
+  
   const selectTopic = async (topic) => {
     setCurrentTopic(topic);
     setSidebarOpen(false);
@@ -74,7 +80,7 @@ export default function TutorView() {
     setIsTyping(true);
     
     try {
-      const question = await getQuestion(currentSubject, topic.id, difficulty, language, shownQuestions);
+      const question = await getQuestion(currentSubject, topic.id, null, language, shownQuestions);
       
       if (!question) {
         setIsTyping(false);
@@ -121,7 +127,7 @@ export default function TutorView() {
       content: `${String.fromCharCode(65 + selectedIndex)}) ${currentQuestion.options[selectedIndex]}`,
     });
     
-    updateStats(isCorrect);
+    updateStats(isCorrect, currentSubject, currentTopic?.id);
     
     setIsTyping(true);
     setTimeout(() => {
@@ -180,12 +186,6 @@ export default function TutorView() {
     }
   };
   
-  const difficulties = [
-    { id: 'easy', label: t('Легкий', 'Жеңіл') },
-    { id: 'medium', label: t('Средний', 'Орташа') },
-    { id: 'hard', label: t('Сложный', 'Қиын') },
-  ];
-  
   if (!currentSubject) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fade-in">
@@ -203,7 +203,6 @@ export default function TutorView() {
   
   return (
     <div className="flex gap-5 h-[calc(100vh-140px)] animate-fade-in">
-      {/* Mobile Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="lg:hidden fixed bottom-4 right-4 z-50 w-12 h-12 bg-kz-blue rounded-full flex items-center justify-center shadow-lg"
@@ -211,7 +210,6 @@ export default function TutorView() {
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
       
-      {/* Sidebar - Desktop always visible, Mobile conditional */}
       <aside className={`
         ${sidebarOpen ? 'fixed inset-0 z-40 bg-dark-bg/95 backdrop-blur-sm flex items-center justify-center' : 'hidden'}
         lg:static lg:flex lg:w-72 lg:bg-dark-card lg:backdrop-blur-none
@@ -228,7 +226,7 @@ export default function TutorView() {
             </button>
           </div>
           
-          <div className="mb-5 overflow-y-auto flex-1">
+          <div className="overflow-y-auto flex-1">
             <h3 className="text-sm font-semibold text-slate-300 mb-3 hidden lg:flex items-center gap-2">
               📋 {t('Темы по предмету', 'Пән бойынша тақырыптар')}
             </h3>
@@ -247,33 +245,10 @@ export default function TutorView() {
                 >
                   <span className="truncate">{language === 'kz' ? topic.nameKz : topic.name}</span>
                   <span className={`text-xs font-semibold ml-2 shrink-0 ${
-                    topic.progress > 50 ? 'text-green-400' : 'text-amber-400'
+                    getTopicProgress(topic.id) > 50 ? 'text-green-400' : 'text-amber-400'
                   }`}>
-                    {topic.progress}%
+                    {getTopicProgress(topic.id)}%
                   </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="pt-4 border-t border-dark-border">
-            <h3 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
-              {t('Сложность', 'Қиындық')}
-            </h3>
-            <div className="flex gap-1.5">
-              {difficulties.map((d) => (
-                <button
-                  key={d.id}
-                  onClick={() => setDifficulty(d.id)}
-                  className={`
-                    flex-1 py-2 rounded-lg text-xs font-medium transition-all
-                    ${difficulty === d.id
-                      ? 'bg-kz-blue text-white'
-                      : 'bg-dark-bg text-slate-400 hover:text-slate-200 border border-dark-border'
-                    }
-                  `}
-                >
-                  {d.label}
                 </button>
               ))}
             </div>
@@ -281,9 +256,7 @@ export default function TutorView() {
         </div>
       </aside>
       
-      {/* Chat */}
       <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl flex flex-col overflow-hidden">
-        {/* Chat Header */}
         <div className="px-5 py-4 border-b border-dark-border flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-kz-blue to-kz-gold flex items-center justify-center text-lg">
             🤖
@@ -303,7 +276,6 @@ export default function TutorView() {
           )}
         </div>
         
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
           {messages.length === 0 && (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400">
@@ -423,7 +395,6 @@ export default function TutorView() {
           <div ref={messagesEndRef} />
         </div>
         
-        {/* Input */}
         <div className="px-5 py-4 border-t border-dark-border flex gap-3">
           <input
             type="text"
