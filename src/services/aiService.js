@@ -28,6 +28,3 @@ export const generateLocalQuestion = (subjectId, topicId, difficulty, shownIds =
 export const getQuestion = async (subjectId, topicId, difficulty, language = 'ru', shownIds = []) => {
   return generateLocalQuestion(subjectId, topicId, difficulty, shownIds);
 };
-
-// Экспортируем и под другим именем для совместимости
-export { generateLocalQuestion };
