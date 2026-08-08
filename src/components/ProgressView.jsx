@@ -25,7 +25,6 @@ export default function ProgressView() {
         {t('Ваш прогресс', 'Сіздің прогресіңіз')}
       </h2>
       
-      {/* Общая статистика */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-dark-card border border-dark-border rounded-2xl p-6">
           <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
@@ -60,7 +59,6 @@ export default function ProgressView() {
         </div>
       </div>
       
-      {/* Прогресс по неделям */}
       <div className="bg-dark-card border border-dark-border rounded-2xl p-6 mb-8">
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
           <TrendingUp size={18} className="text-kz-blue" />
@@ -85,7 +83,6 @@ export default function ProgressView() {
         </div>
       </div>
       
-      {/* Прогресс по предметам */}
       <div className="bg-dark-card border border-dark-border rounded-2xl p-6">
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
           <Target size={18} className="text-kz-blue" />
@@ -94,7 +91,7 @@ export default function ProgressView() {
         
         <div className="space-y-4">
           {subjects.map((subject) => {
-            const subjectStats = stats.subjectProgress[subject.id] || { answered: 0, correct: 0 };
+            const subjectStats = stats.subjectStats[subject.id] || { answered: 0, correct: 0 };
             const subjectAccuracy = subjectStats.answered > 0 
               ? Math.round((subjectStats.correct / subjectStats.answered) * 100) 
               : 0;
@@ -107,7 +104,7 @@ export default function ProgressView() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium">{t(subject.nameRu, subject.nameKz)}</span>
+                    <span className="font-medium">{language === 'kz' ? subject.nameKz : subject.name}</span>
                     <span className="text-sm text-slate-400">
                       {subjectStats.answered} {t('заданий', 'тапсырма')} · {subjectAccuracy}%
                     </span>
