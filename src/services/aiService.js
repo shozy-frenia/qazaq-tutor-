@@ -1,10 +1,8 @@
 import { getRandomQuestion, questionsDB } from '../data/questions.js';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// ВРЕМЕННО: захардкодим ключ для теста
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AQ.Ab8RN6JI5uyjbTXpxOvxyGvrbKBnSvrbT6Pxd0iNfdICdLAaqw';
 
-// ВРЕМЕННО для отладки:
-console.log('ENV KEY exists?', !!GEMINI_API_KEY);
-console.log('ENV KEY length:', GEMINI_API_KEY?.length);
 
 
 export const generateGeminiQuestion = async (subjectName, topicName, language = 'ru') => {
