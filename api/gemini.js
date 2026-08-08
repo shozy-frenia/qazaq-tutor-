@@ -24,8 +24,8 @@ export default async function handler(req, res) {
     ? `Сен Қазақстандық оқушыларға ЕНТ-ге дайындауға көмектесетін AI-репетиторсың...`
     : `Ты — AI-репетитор для подготовки к ЕНТ в Казахстане...`;
 
-  const requestBody = {
-  model: 'gpt-3.5-turbo',  // ← ИЗМЕНЕНО
+const requestBody = {
+  model: 'bbl/gemini-3.5-flash',  // ← ИЗМЕНЕНО
   messages: [
     { role: 'system', content: 'You are a helpful AI tutor for Kazakh students preparing for ENT exams.' },
     { role: 'user', content: prompt }
@@ -33,6 +33,7 @@ export default async function handler(req, res) {
   temperature: 0.7,
   max_tokens: 800,
 };
+
 
 
   console.log('=== SENDING TO FREETHEAI ===');
