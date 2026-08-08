@@ -1,4 +1,3 @@
-// api/gemini.js
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -8,37 +7,34 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { subjectName, topicName, language } = req.body;
-  
-  console.log('=== REQUEST RECEIVED ===');
-  console.log('subjectName:', subjectName);
-  console.log('topicName:', topicName);
-  console.log('language:', language);
-  console.log('API Key exists?', !!process.env.GEMINI_API_KEY);
-  console.log('API Key first 10 chars:', process.env.GEMINI_API_KEY?.slice(0, 10));
 
   if (!subjectName || !topicName) {
     return res.status(400).json({ error: "subjectName and topicName are required" });
   }
 
   const prompt = language === 'kz'
-    ? `Сен Қазақстандық оқушыларға ЕНТ-ге дайындауға көмектесетін AI-репетиторсың...`
-    : `Ты — AI-репетитор для подготовки к ЕНТ в Казахстане...`;
-
-const requestBody = {
-  model: 'bbl/gemini-3.5-flash',  // ← ИЗМЕНЕНО
-  messages: [
-    { role: 'system', content: 'You are a helpful AI tutor for Kazakh students preparing for ENT exams.' },
-    { role: 'user', content: prompt }
-  ],
-  temperature: 0.7,
-  max_tokens: 800,
-};
-
-
-
-  console.log('=== SENDING TO FREETHEAI ===');
-  console.log('URL:', 'https://api.freetheai.xyz/v1/chat/completions');
-  console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    ? `Сен Қазақстандық оқушыларға ЕНТ-ге дайындауға көмектесетін AI-репетиторсың.
+«${subjectName}» пәні бойынша «${topicName}» тақырыбына нақты тапсырма бер.
+Бұл ЕНТ деңгейіндегі тапсырма болуы керек.
+Формат:
+СҰРАҚ: [нақты сұрақ]
+А) [нұсқа 1]
+Б) [нұсқа 2]
+В) [нұсқа 3]
+Г) [нұсқа 4]
+ДҰРЫС: [А/Б/В/Г]
+ТҮСІНДІРМЕ: [толық түсіндірме]`
+    : `Ты — AI-репетитор для подготовки к ЕНТ в Казахстане.
+Сгенерируй задание по предмету «${subjectName}» на тему «${topicName}».
+Это должно быть задание уровня ЕНТ (Единое Национальное Тестирование).
+Формат:
+ВОПРОС: [конкретный вопрос]
+А) [вариант 1]
+Б) [вариант 2]
+В) [вариант 3]
+Г) [вариант 4]
+ПРАВИЛЬНЫЙ: [А/Б/В/Г]
+ОБЪЯСНЕНИЕ: [подробное объяснение]`;
 
   try {
     const response = await fetch('https://api.freetheai.xyz/v1/chat/completions', {
@@ -47,23 +43,66 @@ const requestBody = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: 'bbl/gemini-3.5-flash',
+        messages: [
+          { role: 'system', content: 'You are a helpful AI tutor for Kazakh students preparing for ENT exams.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 800,
+      }),
     });
 
-    console.log('=== FREETHEAI RESPONSE ===');
-    console.log('Status:', response.status);
-    
-    const responseText = await response.text();
-    console.log('Raw response:', responseText);
-
     if (!response.ok) {
-      return res.status(500).json({ 
-        error: `FreeTheAi error: ${response.status}`,
-        details: responseText 
-      });
+      const errText = await response.text();
+      console.error('FreeTheAi error:', response.status, errText);
+      return res.status(500).json({ error: `FreeTheAi error: ${response.status}` });
     }
 
-    // ... остальной код парсинга ...
+    const data = await response.json();
+    
+    // ✅ OpenAI формат: data.choices[0].message.content
+    const text = data.choices?.[0]?.message?.content || '';
+
+    // Парсим ответ
+    const lines = text.split('\n').filter(l => l.trim());
+    
+    const questionLine = lines.find(l => l.includes('ВОПРОС:') || l.includes('СҰРАҚ:'));
+    const questionText = questionLine ? questionLine.replace(/.*?:\s*/, '').trim() : 'Вопрос';
+    
+    const options = [];
+    const optionLines = lines.filter(l => /^[А-ДA-D][).)\s]/.test(l));
+    optionLines.forEach(l => {
+      const clean = l.replace(/^[А-ДA-D][).)\s]+/, '').trim();
+      if (clean) options.push(clean);
+    });
+    
+    const correctLine = lines.find(l => l.includes('ПРАВИЛЬНЫЙ:') || l.includes('ДҰРЫС:'));
+    let correct = 0;
+    if (correctLine) {
+      const match = correctLine.match(/[А-ДA-D]/);
+      if (match) {
+        const letter = match[0];
+        correct = 'АБВГ'.indexOf(letter);
+        if (correct === -1) correct = 'ABCD'.indexOf(letter);
+      }
+    }
+    
+    const explanationLine = lines.find(l => l.includes('ОБЪЯСНЕНИЕ:') || l.includes('ТҮСІНДІРМЕ:'));
+    const explanation = explanationLine ? explanationLine.replace(/.*?:\s*/, '').trim() : 'Объяснение отсутствует';
+
+    return res.status(200).json({
+      id: 'gemini-' + Date.now(),
+      question: questionText,
+      questionKz: questionText,
+      options: options.length >= 4 ? options : ['A', 'B', 'C', 'D'],
+      correct: Math.max(0, correct),
+      explanation: explanation,
+      explanationKz: explanation,
+      topicId: 'ai-generated',
+      difficulty: 'medium',
+    });
 
   } catch (error) {
     console.error('Server error:', error);
