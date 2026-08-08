@@ -2,8 +2,7 @@ import { getRandomQuestion } from '../data/questions.js';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-// Генерация через Gemini API
-export const generateGeminiQuestion = async (subjectName, topicName, difficulty, language = 'ru') => {
+export const generateGeminiQuestion = async (subjectName, topicName, language = 'ru') => {
   if (!GEMINI_API_KEY) {
     console.log('Gemini API key not found');
     return null;
@@ -11,7 +10,7 @@ export const generateGeminiQuestion = async (subjectName, topicName, difficulty,
 
   const prompt = language === 'kz'
     ? `Сен Қазақстандық оқушыларға ЕНТ-ге дайындауға көмектесетін AI-репетиторсың.
-«${subjectName}» пәні бойынша «${topicName}» тақырыбына ${difficulty === 'easy' ? 'жеңіл' : difficulty === 'medium' ? 'орташа' : 'қиын'} деңгейде нақты тапсырма бер.
+«${subjectName}» пәні бойынша «${topicName}» тақырыбына нақты тапсырма бер.
 Формат:
 СҰРАҚ: [нақты сұрақ]
 А) [нұсқа 1]
@@ -21,7 +20,7 @@ export const generateGeminiQuestion = async (subjectName, topicName, difficulty,
 ДҰРЫС: [А/Б/В/Г]
 ТҮСІНДІРМЕ: [толық түсіндірме]`
     : `Ты — AI-репетитор для подготовки к ЕНТ в Казахстане.
-Сгенерируй задание по предмету «${subjectName}» на тему «${topicName}» уровня ${difficulty}.
+Сгенерируй задание по предмету «${subjectName}» на тему «${topicName}».
 Формат:
 ВОПРОС: [конкретный вопрос]
 А) [вариант 1]
@@ -49,7 +48,6 @@ export const generateGeminiQuestion = async (subjectName, topicName, difficulty,
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // Парсинг ответа
     const lines = text.split('\n').filter(l => l.trim());
     
     const questionLine = lines.find(l => l.includes('ВОПРОС:') || l.includes('СҰРАҚ:'));
@@ -85,7 +83,7 @@ export const generateGeminiQuestion = async (subjectName, topicName, difficulty,
       explanation: explanation,
       explanationKz: explanation,
       topicId: 'ai-generated',
-      difficulty: difficulty,
+      difficulty: 'medium',
     };
   } catch (error) {
     console.error('Gemini error:', error);
@@ -93,28 +91,20 @@ export const generateGeminiQuestion = async (subjectName, topicName, difficulty,
   }
 };
 
-// Локальная база
-export const generateLocalQuestion = (subjectId, topicId, difficulty, shownIds = []) => {
-  let question = getRandomQuestion(subjectId, topicId, difficulty, shownIds);
+export const generateLocalQuestion = (subjectId, topicId, shownIds = []) => {
+  let questions = questionsDB[subjectId] || [];
   
-  if (!question) {
-    // Пробуем любую сложность для этой темы
-    question = getRandomQuestion(subjectId, topicId, null, shownIds);
+  if (topicId) {
+    questions = questions.filter(q => q.topicId === topicId);
   }
   
-  if (!question) {
-    // Пробуем любую тему этого предмета
-    question = getRandomQuestion(subjectId, null, difficulty, shownIds);
-  }
+  questions = questions.filter(q => !shownIds.includes(q.id));
   
-  if (!question) {
-    return null; // Не fallback, а null — чтобы вызвать AI
-  }
+  if (questions.length === 0) return null;
   
-  return question;
+  return questions[Math.floor(Math.random() * questions.length)];
 };
 
-// ГЛАВНАЯ ФУНКЦИЯ
 export const getQuestion = async (subjectId, topicId, difficulty, language = 'ru', shownIds = []) => {
   const subjectNames = {
     math: { ru: 'Математика', kz: 'Математика' },
@@ -137,4 +127,40 @@ export const getQuestion = async (subjectId, topicId, difficulty, language = 'ru
     kinematics: { ru: 'Кинематика', kz: 'Кинематика' },
     dynamics: { ru: 'Динамика', kz: 'Динамика' },
     conservation: { ru: 'Законы сохранения', kz: 'Сақталу заңдары' },
-    electricity:
+    electricity: { ru: 'Электричество', kz: 'Электр' },
+    magnetism: { ru: 'Магнетизм', kz: 'Магнетизм' },
+    optics: { ru: 'Оптика', kz: 'Оптика' },
+    periodic: { ru: 'Периодический закон', kz: 'Периодтық заң' },
+    bonds: { ru: 'Химические связи', kz: 'Химиялық байланыстар' },
+    oxidation: { ru: 'Реакции окисления', kz: 'Тотығу реакциялары' },
+    organic: { ru: 'Органическая химия', kz: 'Органикалық химия' },
+    solutions: { ru: 'Растворы', kz: 'Ерітінділер' },
+    ancient: { ru: 'Древний Казахстан', kz: 'Ежелгі Қазақстан' },
+    'golden-horde': { ru: 'Золотая Орда', kz: 'Алтын Орда' },
+    khanate: { ru: 'Казахское ханство', kz: 'Қазақ хандығы' },
+    russia: { ru: 'Присоединение к России', kz: 'Ресейге қосылу' },
+    'xx-century': { ru: 'XX век', kz: 'XX ғасыр' },
+    modern: { ru: 'Современность', kz: 'Қазіргі заман' },
+    cell: { ru: 'Клетка', kz: 'Жасуша' },
+    genetics: { ru: 'Генетика', kz: 'Генетика' },
+    evolution: { ru: 'Эволюция', kz: 'Эволюция' },
+    ecology: { ru: 'Экология', kz: 'Экология' },
+    anatomy: { ru: 'Анатомия', kz: 'Анатомия' },
+    phonetics: { ru: 'Фонетика', kz: 'Фонетика' },
+    morphology: { ru: 'Морфология', kz: 'Морфология' },
+    syntax: { ru: 'Синтаксис', kz: 'Синтаксис' },
+    lexicon: { ru: 'Лексика', kz: 'Лексика' },
+    orthography: { ru: 'Орфография', kz: 'Емле' },
+  };
+  
+  const subjectName = subjectNames[subjectId]?.[language] || subjectNames[subjectId]?.ru || subjectId;
+  const topicName = topicNames[topicId]?.[language] || topicNames[topicId]?.ru || topicId;
+  
+  let question = generateLocalQuestion(subjectId, topicId, shownIds);
+  
+  if (!question) {
+    question = await generateGeminiQuestion(subjectName, topicName, language);
+  }
+  
+  return question;
+};
