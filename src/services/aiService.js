@@ -2,7 +2,29 @@ import { getRandomQuestion, questionsDB } from '../data/questions.js';
 
 // ВРЕМЕННО: захардкодим ключ для теста
 // aiService.js — временная диагностика
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_URL = '/api/gemini';
+
+export const generateGeminiQuestion = async (subjectName, topicName, language = 'ru') => {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subjectName, topicName, language }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      console.error('Proxy API error:', errData);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Proxy fetch error:', error);
+    return null;
+  }
+};
+
 
 
 
