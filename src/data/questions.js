@@ -403,10 +403,23 @@ export const getQuestionsByTopic = (subjectId, topicId) => {
   const questions = questionsDB[subjectId] || [];
   return questions.filter(q => q.topicId === topicId);
 };
-export const getRandomQuestion = (subjectId, topicId = null, difficulty = null) => {
+
+// ИСПРАВЛЕНО: теперь исключает уже показанные вопросы
+export const getRandomQuestion = (subjectId, topicId = null, difficulty = null, shownIds = []) => {
   let questions = questionsDB[subjectId] || [];
-  if (topicId) questions = questions.filter(q => q.topicId === topicId);
-  if (difficulty) questions = questions.filter(q => q.difficulty === difficulty);
+  
+  if (topicId) {
+    questions = questions.filter(q => q.topicId === topicId);
+  }
+  
+  if (difficulty) {
+    questions = questions.filter(q => q.difficulty === difficulty);
+  }
+  
+  // Исключаем уже показанные
+  questions = questions.filter(q => !shownIds.includes(q.id));
+  
   if (questions.length === 0) return null;
+  
   return questions[Math.floor(Math.random() * questions.length)];
 };
