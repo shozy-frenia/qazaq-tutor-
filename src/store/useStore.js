@@ -13,7 +13,7 @@ export const useStore = create((set, get) => ({
   currentTopic: null,
   setCurrentTopic: (topic) => set({ currentTopic: topic }),
   
-  difficulty: 'easy',
+  difficulty: null,
   setDifficulty: (diff) => set({ difficulty: diff }),
   
   messages: [],
@@ -31,7 +31,6 @@ export const useStore = create((set, get) => ({
   isLoading: false,
   setIsLoading: (val) => set({ isLoading: val }),
   
-  // РЕАЛЬНАЯ статистика
   stats: {
     totalAnswered: 0,
     correctAnswers: 0,
@@ -47,9 +46,11 @@ export const useStore = create((set, get) => ({
     },
     weeklyProgress: [0, 0, 0, 0, 0, 0, 0],
     lastActiveDay: null,
+    completedSubjects: [],
+    topicProgress: {},
   },
   
-  updateStats: (isCorrect, subjectId) => set((state) => {
+  updateStats: (isCorrect, subjectId, topicId) => set((state) => {
     const today = new Date().getDay();
     const newStreak = isCorrect ? state.stats.streak + 1 : 0;
     const newBestStreak = Math.max(newStreak, state.stats.bestStreak);
@@ -65,6 +66,23 @@ export const useStore = create((set, get) => ({
       };
     }
     
+    const topicKey = topicId ? `${subjectId}:${topicId}` : null;
+    const newTopicProgress = { ...state.stats.topicProgress };
+    if (topicKey) {
+      const tp = newTopicProgress[topicKey] || { answered: 0, correct: 0 };
+      newTopicProgress[topicKey] = {
+        answered: tp.answered + 1,
+        correct: tp.correct + (isCorrect ? 1 : 0),
+      };
+    }
+    
+    const completedSubjects = [...state.stats.completedSubjects];
+    if (topicKey && newTopicProgress[topicKey]?.correct >= 5) {
+      if (!completedSubjects.includes(subjectId)) {
+        completedSubjects.push(subjectId);
+      }
+    }
+    
     return {
       stats: {
         ...state.stats,
@@ -74,6 +92,8 @@ export const useStore = create((set, get) => ({
         bestStreak: newBestStreak,
         subjectStats,
         weeklyProgress: weekProgress,
+        topicProgress: newTopicProgress,
+        completedSubjects,
       },
     };
   }),
