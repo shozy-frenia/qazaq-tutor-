@@ -18,6 +18,11 @@ export default function ProgressView() {
     ? Math.round((stats.correctAnswers / stats.totalAnswered) * 100) 
     : 0;
   
+  // Общее количество решённых заданий по всем предметам
+  const getTotalSubjectAnswered = () => {
+    return Object.values(stats.subjectStats).reduce((sum, s) => sum + s.answered, 0);
+  };
+  
   return (
     <div className="animate-fade-in">
       <h2 className="text-xl font-bold mb-6 flex items-center gap-2.5">
@@ -92,9 +97,16 @@ export default function ProgressView() {
         <div className="space-y-4">
           {subjects.map((subject) => {
             const subjectStats = stats.subjectStats[subject.id] || { answered: 0, correct: 0 };
-            const subjectAccuracy = subjectStats.answered > 0 
-              ? Math.round((subjectStats.correct / subjectStats.answered) * 100) 
+            const totalAnsweredAll = getTotalSubjectAnswered();
+            
+            // Процент = (заданий по этому предмету / общее количество заданий) * 100
+            // Если totalAnsweredAll = 0, то 0%
+            // Если решил 1 по математике из 1 общего = 100%
+            // Если решил 1 по математике и 1 по химии из 2 общих = 50% у каждого
+            const subjectPercentage = totalAnsweredAll > 0 
+              ? Math.round((subjectStats.answered / totalAnsweredAll) * 100) 
               : 0;
+            
             const isCompleted = stats.completedSubjects.includes(subject.id);
             
             return (
@@ -106,13 +118,13 @@ export default function ProgressView() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium">{language === 'kz' ? subject.nameKz : subject.name}</span>
                     <span className="text-sm text-slate-400">
-                      {subjectStats.answered} {t('заданий', 'тапсырма')} · {subjectAccuracy}%
+                      {subjectStats.answered} {t('заданий', 'тапсырма')} · {subjectPercentage}%
                     </span>
                   </div>
                   <div className="h-2 bg-dark-bg rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-kz-blue'}`}
-                      style={{ width: `${Math.min(subjectAccuracy, 100)}%` }}
+                      style={{ width: `${Math.min(subjectPercentage, 100)}%` }}
                     />
                   </div>
                 </div>
