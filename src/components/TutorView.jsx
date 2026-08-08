@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore.js';
 import { getSubjectById } from '../data/subjects.js';
-import { getQuestion } from '../services/aiService.js';
+import { getQuestion, getGeminiQuestionOnly } from '../services/aiService.js';
 import { Send, Bot, User, Menu, X } from 'lucide-react';
 
 export default function TutorView() {
@@ -27,6 +27,7 @@ export default function TutorView() {
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [shownQuestions, setShownQuestions] = useState([]);
+  const [useGeminiOnly, setUseGeminiOnly] = useState(false);
   const messagesEndRef = useRef(null);
   
   const t = (ru, kz) => language === 'kz' ? kz : ru;
@@ -60,6 +61,7 @@ export default function TutorView() {
     setCurrentTopic(topic);
     setSidebarOpen(false);
     setShownQuestions([]);
+    setUseGeminiOnly(false);
     
     const msg = {
       type: 'ai',
@@ -70,17 +72,25 @@ export default function TutorView() {
     };
     addMessage(msg);
     
-    await generateNewQuestion(topic);
+    await generateNewQuestion(topic, false);
   };
   
-  const generateNewQuestion = async (topic = currentTopic) => {
+  const generateNewQuestion = async (topic = currentTopic, forceGemini = false) => {
     if (!topic || !currentSubject) return;
     
     setIsLoading(true);
     setIsTyping(true);
     
     try {
-      const question = await getQuestion(currentSubject, topic.id, null, language, shownQuestions);
+      let question;
+      
+      // Если forceGemini = true или useGeminiOnly = true — только Gemini
+      if (forceGemini || useGeminiOnly) {
+        question = await getGeminiQuestionOnly(currentSubject, topic.id, language);
+      } else {
+        // Сначала локальная база, потом Gemini
+        question = await getQuestion(currentSubject, topic.id, null, language, shownQuestions);
+      }
       
       if (!question) {
         setIsTyping(false);
@@ -88,8 +98,8 @@ export default function TutorView() {
         addMessage({
           type: 'ai',
           content: t(
-            'По этой теме пока нет заданий. Выберите другую тему! 📚',
-            'Бұл тақырып бойынша тапсырмалар жоқ. Басқа тақырыпты таңдаңыз! 📚'
+            'Не удалось сгенерировать задание. Проверьте подключение к интернету или попробуйте позже. 🌐',
+            'Тапсырма жасай алмады. Интернет байланысын тексеріңіз немесе кейінірек көріңіз. 🌐'
           ),
         });
         return;
@@ -163,10 +173,14 @@ export default function TutorView() {
     const lowerText = text.toLowerCase();
     
     if (lowerText.includes('ещё') || lowerText.includes('еще') || lowerText.includes('тағы') || lowerText.includes('следующ')) {
+      // Включаем режим только Gemini, чтобы всегда генерировать новые вопросы
+      setUseGeminiOnly(true);
+      
       setIsTyping(true);
       setTimeout(async () => {
         setIsTyping(false);
-        await generateNewQuestion();
+        // forceGemini = true — принудительно через Gemini
+        await generateNewQuestion(currentTopic, true);
       }, 600);
     } else {
       addMessage({
