@@ -4,12 +4,6 @@ import { getRandomQuestion, questionsDB } from '../data/questions.js';
 // aiService.js — временная диагностика
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-// ВРЕМЕННО: логируем всё
-console.log('=== ENV DEBUG ===');
-console.log('typeof import.meta.env:', typeof import.meta.env);
-console.log('keys:', Object.keys(import.meta.env).filter(k => k.includes('VITE')));
-console.log('GEMINI_API_KEY from env:', GEMINI_API_KEY ? 'EXISTS (hidden)' : 'UNDEFINED');
-console.log('=================');
 
 
 
