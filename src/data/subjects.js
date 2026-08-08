@@ -1,4 +1,3 @@
-
 export const subjects = {
   math: {
     id: 'math',
@@ -11,14 +10,14 @@ export const subjects = {
     questionsCount: 8420,
     timeMinutes: 45,
     topics: [
-      { id: 'quadratic', name: 'Квадратные уравнения', nameKz: 'Квадраттық теңдеулер', progress: 0, difficulties: ['easy', 'medium', 'hard'] },
-      { id: 'trigonometry', name: 'Тригонометрия', nameKz: 'Тригонометрия', progress: 0, difficulties: ['easy', 'medium', 'hard'] },
-      { id: 'derivative', name: 'Производная', nameKz: 'Туынды', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'integrals', name: 'Интегралы', nameKz: 'Интегралдар', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'vectors', name: 'Векторы', nameKz: 'Векторлар', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'stereometry', name: 'Стереометрия', nameKz: 'Стереометрия', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'probability', name: 'Вероятность', nameKz: 'Ықтималдық', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'progressions', name: 'Прогрессии', nameKz: 'Прогрессиялар', progress: 0, difficulties: ['easy', 'medium', 'hard'] },
+      { id: 'quadratic', name: 'Квадратные уравнения', nameKz: 'Квадраттық теңдеулер', progress: 0 },
+      { id: 'trigonometry', name: 'Тригонометрия', nameKz: 'Тригонометрия', progress: 0 },
+      { id: 'derivative', name: 'Производная', nameKz: 'Туынды', progress: 0 },
+      { id: 'integrals', name: 'Интегралы', nameKz: 'Интегралдар', progress: 0 },
+      { id: 'vectors', name: 'Векторы', nameKz: 'Векторлар', progress: 0 },
+      { id: 'stereometry', name: 'Стереометрия', nameKz: 'Стереометрия', progress: 0 },
+      { id: 'probability', name: 'Вероятность', nameKz: 'Ықтималдық', progress: 0 },
+      { id: 'progressions', name: 'Прогрессии', nameKz: 'Прогрессиялар', progress: 0 },
     ],
   },
   physics: {
@@ -32,12 +31,12 @@ export const subjects = {
     questionsCount: 6150,
     timeMinutes: 40,
     topics: [
-      { id: 'kinematics', name: 'Кинематика', nameKz: 'Кинематика', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'dynamics', name: 'Динамика', nameKz: 'Динамика', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'conservation', name: 'Законы сохранения', nameKz: 'Сақталу заңдары', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'electricity', name: 'Электричество', nameKz: 'Электр', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'magnetism', name: 'Магнетизм', nameKz: 'Магнетизм', progress: 0, difficulties: ['hard'] },
-      { id: 'optics', name: 'Оптика', nameKz: 'Оптика', progress: 0, difficulties: ['easy', 'medium'] },
+      { id: 'kinematics', name: 'Кинематика', nameKz: 'Кинематика', progress: 0 },
+      { id: 'dynamics', name: 'Динамика', nameKz: 'Динамика', progress: 0 },
+      { id: 'conservation', name: 'Законы сохранения', nameKz: 'Сақталу заңдары', progress: 0 },
+      { id: 'electricity', name: 'Электричество', nameKz: 'Электр', progress: 0 },
+      { id: 'magnetism', name: 'Магнетизм', nameKz: 'Магнетизм', progress: 0 },
+      { id: 'optics', name: 'Оптика', nameKz: 'Оптика', progress: 0 },
     ],
   },
   chemistry: {
@@ -51,11 +50,11 @@ export const subjects = {
     questionsCount: 5800,
     timeMinutes: 35,
     topics: [
-      { id: 'periodic', name: 'Периодический закон', nameKz: 'Периодтық заң', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'bonds', name: 'Химические связи', nameKz: 'Химиялық байланыстар', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'oxidation', name: 'Реакции окисления', nameKz: 'Тотығу реакциялары', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'organic', name: 'Органическая химия', nameKz: 'Органикалық химия', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'solutions', name: 'Растворы', nameKz: 'Ерітінділер', progress: 0, difficulties: ['easy', 'medium'] },
+      { id: 'periodic', name: 'Периодический закон', nameKz: 'Периодтық заң', progress: 0 },
+      { id: 'bonds', name: 'Химические связи', nameKz: 'Химиялық байланыстар', progress: 0 },
+      { id: 'oxidation', name: 'Реакции окисления', nameKz: 'Тотығу реакциялары', progress: 0 },
+      { id: 'organic', name: 'Органическая химия', nameKz: 'Органикалық химия', progress: 0 },
+      { id: 'solutions', name: 'Растворы', nameKz: 'Ерітінділер', progress: 0 },
     ],
   },
   history: {
@@ -69,12 +68,12 @@ export const subjects = {
     questionsCount: 4200,
     timeMinutes: 30,
     topics: [
-      { id: 'ancient', name: 'Древний Казахстан', nameKz: 'Ежелгі Қазақстан', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'golden-horde', name: 'Золотая Орда', nameKz: 'Алтын Орда', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'khanate', name: 'Казахское ханство', nameKz: 'Қазақ хандығы', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'russia', name: 'Присоединение к России', nameKz: 'Ресейге қосылу', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'xx-century', name: 'XX век', nameKz: 'XX ғасыр', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'modern', name: 'Современность', nameKz: 'Қазіргі заман', progress: 0, difficulties: ['easy', 'medium'] },
+      { id: 'ancient', name: 'Древний Казахстан', nameKz: 'Ежелгі Қазақстан', progress: 0 },
+      { id: 'golden-horde', name: 'Золотая Орда', nameKz: 'Алтын Орда', progress: 0 },
+      { id: 'khanate', name: 'Казахское ханство', nameKz: 'Қазақ хандығы', progress: 0 },
+      { id: 'russia', name: 'Присоединение к России', kz: 'Ресейге қосылу', progress: 0 },
+      { id: 'xx-century', name: 'XX век', nameKz: 'XX ғасыр', progress: 0 },
+      { id: 'modern', name: 'Современность', nameKz: 'Қазіргі заман', progress: 0 },
     ],
   },
   biology: {
@@ -88,11 +87,11 @@ export const subjects = {
     questionsCount: 5100,
     timeMinutes: 35,
     topics: [
-      { id: 'cell', name: 'Клетка', nameKz: 'Жасуша', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'genetics', name: 'Генетика', nameKz: 'Генетика', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'evolution', name: 'Эволюция', nameKz: 'Эволюция', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'ecology', name: 'Экология', nameKz: 'Экология', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'anatomy', name: 'Анатомия', nameKz: 'Анатомия', progress: 0, difficulties: ['medium', 'hard'] },
+      { id: 'cell', name: 'Клетка', nameKz: 'Жасуша', progress: 0 },
+      { id: 'genetics', name: 'Генетика', nameKz: 'Генетика', progress: 0 },
+      { id: 'evolution', name: 'Эволюция', nameKz: 'Эволюция', progress: 0 },
+      { id: 'ecology', name: 'Экология', nameKz: 'Экология', progress: 0 },
+      { id: 'anatomy', name: 'Анатомия', nameKz: 'Анатомия', progress: 0 },
     ],
   },
   kazakh: {
@@ -106,21 +105,14 @@ export const subjects = {
     questionsCount: 7300,
     timeMinutes: 40,
     topics: [
-      { id: 'phonetics', name: 'Фонетика', nameKz: 'Фонетика', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'morphology', name: 'Морфология', nameKz: 'Морфология', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'syntax', name: 'Синтаксис', nameKz: 'Синтаксис', progress: 0, difficulties: ['medium', 'hard'] },
-      { id: 'lexicon', name: 'Лексика', nameKz: 'Лексика', progress: 0, difficulties: ['easy', 'medium'] },
-      { id: 'orthography', name: 'Орфография', nameKz: 'Емле', progress: 0, difficulties: ['easy', 'medium'] },
+      { id: 'phonetics', name: 'Фонетика', nameKz: 'Фонетика', progress: 0 },
+      { id: 'morphology', name: 'Морфология', nameKz: 'Морфология', progress: 0 },
+      { id: 'syntax', name: 'Синтаксис', nameKz: 'Синтаксис', progress: 0 },
+      { id: 'lexicon', name: 'Лексика', nameKz: 'Лексика', progress: 0 },
+      { id: 'orthography', name: 'Орфография', nameKz: 'Емле', progress: 0 },
     ],
   },
 };
 
 export const getSubjectById = (id) => subjects[id] || null;
 export const getAllSubjects = () => Object.values(subjects);
-
-// Фильтр тем по сложности
-export const getTopicsByDifficulty = (subjectId, difficulty) => {
-  const subject = subjects[subjectId];
-  if (!subject) return [];
-  return subject.topics.filter(t => t.difficulties.includes(difficulty));
-};
