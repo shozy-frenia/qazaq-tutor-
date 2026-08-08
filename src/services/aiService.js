@@ -138,4 +138,35 @@ export const getQuestion = async (subjectId, topicId, difficulty, language = 'ru
     kinematics: { ru: 'Кинематика', kz: 'Кинематика' },
     dynamics: { ru: 'Динамика', kz: 'Динамика' },
     conservation: { ru: 'Законы сохранения', kz: 'Сақталу заңдары' },
-    electricity:
+    electricity: { ru: 'Электричество', kz: 'Электр' },
+    thermodynamics: { ru: 'Термодинамика', kz: 'Термодинамика' },
+    optics: { ru: 'Оптика', kz: 'Оптика' },
+    organic: { ru: 'Органическая химия', kz: 'Органикалық химия' },
+    inorganic: { ru: 'Неорганическая химия', kz: 'Бейорганикалық химия' },
+    reactions: { ru: 'Химические реакции', kz: 'Химиялық реакциялар' },
+    kazakh_history: { ru: 'История Казахстана', kz: 'Қазақстан тарихы' },
+    world_history: { ru: 'Всемирная история', kz: 'Әлем тарихы' },
+    constitution: { ru: 'Конституция РК', kz: 'ҚР Конституциясы' },
+    cell: { ru: 'Клетка', kz: 'Клетка' },
+    genetics: { ru: 'Генетика', kz: 'Генетика' },
+    ecology: { ru: 'Экология', kz: 'Экология' },
+    human: { ru: 'Человек и здоровье', kz: 'Адам және денсаулық' },
+    morphology: { ru: 'Морфология', kz: 'Морфология' },
+    syntax: { ru: 'Синтаксис', kz: 'Синтаксис' },
+    lexicology: { ru: 'Лексикология', kz: 'Лексикология' },
+  };
+  
+  const subjectName = subjectNames[subjectId]?.[language] || subjectNames[subjectId]?.ru || subjectId;
+  const topicName = topicNames[topicId]?.[language] || topicNames[topicId]?.ru || topicId;
+  
+  // Сначала пробуем локальную базу
+  let question = generateLocalQuestion(subjectId, topicId, difficulty, shownIds);
+  
+  // Если нет — пробуем Gemini
+  if (!question) {
+    question = await generateGeminiQuestion(subjectName, topicName, difficulty, language);
+  }
+  
+  return question;
+};
+
