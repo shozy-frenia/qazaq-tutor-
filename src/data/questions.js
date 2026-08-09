@@ -404,7 +404,6 @@ export const getQuestionsByTopic = (subjectId, topicId) => {
   return questions.filter(q => q.topicId === topicId);
 };
 
-// ИСПРАВЛЕНО: теперь исключает уже показанные вопросы
 export const getRandomQuestion = (subjectId, topicId = null, difficulty = null, shownIds = []) => {
   let questions = questionsDB[subjectId] || [];
   
@@ -416,7 +415,6 @@ export const getRandomQuestion = (subjectId, topicId = null, difficulty = null, 
     questions = questions.filter(q => q.difficulty === difficulty);
   }
   
-  // Исключаем уже показанные
   questions = questions.filter(q => !shownIds.includes(q.id));
   
   if (questions.length === 0) return null;
