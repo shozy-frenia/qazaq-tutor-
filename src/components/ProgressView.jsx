@@ -18,7 +18,7 @@ export default function ProgressView() {
     ? Math.round((stats.correctAnswers / stats.totalAnswered) * 100) 
     : 0;
   
-  // Общее количество решённых заданий по всем предметам
+  
   const getTotalSubjectAnswered = () => {
     return Object.values(stats.subjectStats).reduce((sum, s) => sum + s.answered, 0);
   };
