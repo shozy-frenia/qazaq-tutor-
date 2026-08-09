@@ -2,7 +2,6 @@ import { getRandomQuestion, questionsDB } from '../data/questions.js';
 
 const API_URL = '/api/gemini';
 
-// ====== НОВЫЙ: через прокси ======
 export const generateGeminiQuestion = async (subjectName, topicName, language = 'ru') => {
   try {
     const response = await fetch(API_URL, {
@@ -24,7 +23,6 @@ export const generateGeminiQuestion = async (subjectName, topicName, language = 
   }
 };
 
-// ====== Локальные вопросы ======
 export const generateLocalQuestion = (subjectId, topicId, shownIds = []) => {
   let questions = questionsDB[subjectId] || [];
   if (topicId) {
@@ -35,7 +33,6 @@ export const generateLocalQuestion = (subjectId, topicId, shownIds = []) => {
   return questions[Math.floor(Math.random() * questions.length)];
 };
 
-// ====== Главная функция ======
 export const getQuestion = async (subjectId, topicId, difficulty, language = 'ru', shownIds = []) => {
   const subjectNames = {
     math: { ru: 'Математика', kz: 'Математика' },
