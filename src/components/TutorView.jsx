@@ -84,11 +84,10 @@ export default function TutorView() {
     try {
       let question;
       
-      // Если forceGemini = true или useGeminiOnly = true — только Gemini
+      
       if (forceGemini || useGeminiOnly) {
         question = await getGeminiQuestionOnly(currentSubject, topic.id, language);
       } else {
-        // Сначала локальная база, потом Gemini
         question = await getQuestion(currentSubject, topic.id, null, language, shownQuestions);
       }
       
@@ -173,13 +172,13 @@ export default function TutorView() {
     const lowerText = text.toLowerCase();
     
     if (lowerText.includes('ещё') || lowerText.includes('еще') || lowerText.includes('тағы') || lowerText.includes('следующ')) {
-      // Включаем режим только Gemini, чтобы всегда генерировать новые вопросы
+      
       setUseGeminiOnly(true);
       
       setIsTyping(true);
       setTimeout(async () => {
         setIsTyping(false);
-        // forceGemini = true — принудительно через Gemini
+        
         await generateNewQuestion(currentTopic, true);
       }, 600);
     } else {
