@@ -62,10 +62,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // ✅ OpenAI формат: data.choices[0].message.content
+    
     const text = data.choices?.[0]?.message?.content || '';
 
-    // Парсим ответ
+    
     const lines = text.split('\n').filter(l => l.trim());
     
     const questionLine = lines.find(l => l.includes('ВОПРОС:') || l.includes('СҰРАҚ:'));
