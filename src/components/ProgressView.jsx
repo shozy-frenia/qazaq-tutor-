@@ -98,11 +98,6 @@ export default function ProgressView() {
           {subjects.map((subject) => {
             const subjectStats = stats.subjectStats[subject.id] || { answered: 0, correct: 0 };
             const totalAnsweredAll = getTotalSubjectAnswered();
-            
-            // Процент = (заданий по этому предмету / общее количество заданий) * 100
-            // Если totalAnsweredAll = 0, то 0%
-            // Если решил 1 по математике из 1 общего = 100%
-            // Если решил 1 по математике и 1 по химии из 2 общих = 50% у каждого
             const subjectPercentage = totalAnsweredAll > 0 
               ? Math.round((subjectStats.answered / totalAnsweredAll) * 100) 
               : 0;
